@@ -6,4 +6,5 @@
  */
 #include "global.h"
 int status = 0;
+int arr[3] = {5,3,2};
 
