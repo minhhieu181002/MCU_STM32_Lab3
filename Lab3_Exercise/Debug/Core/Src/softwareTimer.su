@@ -1,0 +1,6 @@
+softwareTimer.c:22:6:setTimer1	16	static
+softwareTimer.c:26:6:setTimer2	16	static
+softwareTimer.c:30:6:setTimer3	16	static
+softwareTimer.c:34:6:setTimer4	16	static
+softwareTimer.c:38:6:setTimer5	16	static
+softwareTimer.c:42:6:timerRun	4	static
