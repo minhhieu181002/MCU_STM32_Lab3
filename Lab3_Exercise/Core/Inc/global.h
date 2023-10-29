@@ -24,8 +24,26 @@
 #define TIME_FOR_LED_GREEN_RUN 	2
 #define TIME_FOR_LED_YELLOW_RUN 3
 
+#define RED	0
+#define GREEN 1
+#define AMBER	2
+
+#define MAN_RED		12
+#define MAN_GREEN	13
+#define MAN_YELLOW	14
+
+#define MODE_RED	20
+#define MODE_GREEN	21
+#define MODE_AMBER	22
+
+#define DISPLAY_VALUE_RED	3
+#define DISPLAY_VALUE_GREEN	4
+#define DISPLAY_VALUE_AMBER	5
 extern int status;
 extern int arr[3];
-
-
+extern int arrMode[3];
+extern int cntRoad1;
+extern int cntRoad2;
+extern int led_status1;
+extern int led_status2;
 #endif /* INC_GLOBAL_H_ */

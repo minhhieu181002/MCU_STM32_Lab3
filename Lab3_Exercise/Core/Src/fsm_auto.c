@@ -4,10 +4,15 @@
  *  Created on: Oct 23, 2023
  *      Author: HP
  */
+
+
 #include "fsm_auto.h"
+#include "fsm_manual.h"
 const int MAX_LED = 4;
 int index_led = 0;
-int led_buffer[4] = {1, 2, 3, 4};
+
+int led_buffer[4] = {0,6, 2, 3};
+
 
 
 void display7SEG(int num) {
@@ -127,57 +132,86 @@ void display7SEG(int num) {
 	  }
   }
 }
+
+
 void updateLedBuffer (){
-	if(status == AUTO_RED_GREEN){
-		//display for red led
-		led_buffer[0] = 0;
-		led_buffer[1] = 5;
-		//display for green led
-		led_buffer[2] = 0;
-		led_buffer[3] = 3;
+	// update led of road 1
+	if(led_status1 == RED){
+		led_buffer[0] = cntRoad1/10;
+		led_buffer[1] = cntRoad1%10;
 	}
-	if(status == AUTO_RED_AMBER){
-		led_buffer[0] = 0;
-		led_buffer[1] = 3;
-		led_buffer[2] = 0;
-		led_buffer[3] = 2;
+	if(led_status1 == GREEN){
+		led_buffer[0] = cntRoad1/10;
+		led_buffer[1] = cntRoad1%10;
 	}
-	if(status == AUTO_GREEN_RED){
-		//display for green
-		led_buffer[0] = 0;
-		led_buffer[1] = 3;
-		//display for red
-		led_buffer[2] = 0;
-		led_buffer[3] = 5;
+	if(led_status1 == AMBER){
+		led_buffer[0] = cntRoad1/10;
+		led_buffer[1] = cntRoad1%10;
 	}
-	if(status == AUTO_AMBER_RED){
-		led_buffer[0] = 0;
-		led_buffer[1] = 2;
-		led_buffer[2] = 0;
-		led_buffer[3] = 2;
+	// update led of road 2
+	if(led_status2 == GREEN){
+			led_buffer[2] = cntRoad2/10;
+			led_buffer[3] = cntRoad2%10;
+		}
+		if(led_status2 == AMBER){
+			led_buffer[2] = cntRoad2/10;
+			led_buffer[3] = cntRoad2%10;
+		}
+		if(led_status2 == RED){
+			led_buffer[2] = cntRoad2/10;
+			led_buffer[3] = cntRoad2%10;
+		}
+	if((led_status1 == DISPLAY_VALUE_RED) && (led_status2 == MODE_RED)){
+		led_buffer[0] = cntRoad1/10;
+		led_buffer[1] = cntRoad1%10;
+		led_buffer[2] = cntRoad2/10;
+		led_buffer[3] = cntRoad2%10;
 	}
+	if((led_status1 == DISPLAY_VALUE_GREEN) && (led_status2 == MODE_GREEN)){
+		led_buffer[0] = cntRoad1/10;
+		led_buffer[1] = cntRoad1%10;
+		led_buffer[2] = cntRoad2/10;
+		led_buffer[3] = cntRoad2%10;
+	}
+	if((led_status1 == DISPLAY_VALUE_AMBER) && (led_status2 == MODE_AMBER)){
+		led_buffer[0] = cntRoad1/10;
+		led_buffer[1] = cntRoad1%10;
+		led_buffer[2] = cntRoad2/10;
+		led_buffer[3] = cntRoad2%10;
+	}
+
 }
 void update7SEG ( int index ){
+	updateLedBuffer();
 	switch ( index ){
 		case 0:
-			// Display the first 7 SEG with led_buffer [0] and led_buffer [1]
-
 			HAL_GPIO_WritePin(GPIOA,EN0_Pin,0);
-			HAL_GPIO_WritePin(GPIOA, EN1_Pin,0);
+			HAL_GPIO_WritePin(GPIOA, EN1_Pin,1);
 			HAL_GPIO_WritePin(GPIOA, EN2_Pin,1);
 			HAL_GPIO_WritePin(GPIOA, EN3_Pin,1);
 			display7SEG(led_buffer[0]);
-			display7SEG(led_buffer[1]);
 			break ;
 		case 1:
-			// Display the second 7 SEG with led_buffer [2] and led_buffer [3];
+			HAL_GPIO_WritePin(GPIOA,EN0_Pin,1);
+			HAL_GPIO_WritePin(GPIOA, EN1_Pin,0);
+			HAL_GPIO_WritePin(GPIOA, EN2_Pin,1);
+			HAL_GPIO_WritePin(GPIOA, EN3_Pin,1);
+			display7SEG(led_buffer[1]);
+			break ;
+		case 2:
 			HAL_GPIO_WritePin(GPIOA,EN0_Pin,1);
 			HAL_GPIO_WritePin(GPIOA, EN1_Pin,1);
 			HAL_GPIO_WritePin(GPIOA, EN2_Pin,0);
-			HAL_GPIO_WritePin(GPIOA, EN3_Pin,0);
+			HAL_GPIO_WritePin(GPIOA, EN3_Pin,1);
 			display7SEG(led_buffer[2]);
+			break;
+		case 3:
+			HAL_GPIO_WritePin(GPIOA,EN0_Pin,1);
+			HAL_GPIO_WritePin(GPIOA, EN1_Pin,1);
+			HAL_GPIO_WritePin(GPIOA, EN2_Pin,1);
+			HAL_GPIO_WritePin(GPIOA, EN3_Pin,0);
 			display7SEG(led_buffer[3]);
-			break ;
+			break;
 		default :
 			break ;
  	 }
@@ -195,7 +229,6 @@ void fsm_automatic_run() {
 			HAL_GPIO_WritePin(D6_GPIO_Port, D6_Pin, GPIO_PIN_SET);
 			status = AUTO_RED_GREEN;
 			setTimer1(arr[TIME_FOR_RED_GREEN]*100); //3s
-
 			break;
 		case AUTO_RED_GREEN:
 			HAL_GPIO_WritePin(D1_GPIO_Port, D1_Pin, GPIO_PIN_RESET);
@@ -207,6 +240,10 @@ void fsm_automatic_run() {
 			if (timer1_flag == 1){
 				status = AUTO_RED_AMBER;
 				setTimer1(arr[TIME_FOR_RED_AMBER]*100); //2s
+			}
+			if(isButton1Pressed(1) == 1){
+				status = MAN_RED;
+				setTimer1(100);
 			}
 			break;
 		case AUTO_RED_AMBER:
@@ -249,11 +286,73 @@ void fsm_automatic_run() {
 		default:
 			break;
 		}
-	updateLedBuffer();
-	if(timer3_flag == 1){
-		setTimer3(50);
-		if (index_led >= 2) index_led = 0;
-		update7SEG(index_led++);
-	}
+		if(timer3_flag == 1){
+			setTimer3(100);
+			if(led_status1 == RED){
+				cntRoad1--;
+				if(cntRoad1 <= 0){
+					led_status1 = GREEN;
+					cntRoad1 = arr[1];
+				}
+			}
+			else if(led_status1 == GREEN){
+				cntRoad1--;
+				if(cntRoad1 <= 0){
+					led_status1 = AMBER;
+					cntRoad1 = arr[2];
+				}
+			}
+			else if(led_status1 == AMBER){
+				cntRoad1--;
+				if(cntRoad1 <= 0){
+					led_status1 = RED;
+					cntRoad1 = arr[0];
+				}
+			}
+
+			if(led_status2 == GREEN){
+				cntRoad2--;
+				if(cntRoad2 <= 0){
+					led_status2 = AMBER;
+					cntRoad2 = arr[2];
+				}
+			}
+			else if(led_status2 == AMBER){
+				cntRoad2--;
+				if(cntRoad2 <= 0){
+					led_status2 = RED;
+					cntRoad2 = arr[0];
+				}
+			}
+			else if(led_status2 == RED){
+				cntRoad2--;
+				if(cntRoad2 <= 0){
+					led_status2 = GREEN;
+					cntRoad2 = arr[1];
+				}
+			}
+			if((led_status1 == DISPLAY_VALUE_RED) && (led_status2 == MODE_RED)){
+				cntRoad1 = arr[RED];
+				cntRoad2 = arrMode[RED];
+			}
+			else if((led_status1 == DISPLAY_VALUE_GREEN) && (led_status2 == MODE_GREEN)){
+				cntRoad1 = arr[GREEN];
+				cntRoad2 = arrMode[GREEN];
+			}
+			else if((led_status1 == DISPLAY_VALUE_AMBER) && (led_status2 == MODE_AMBER)){
+				cntRoad1 = arr[AMBER];
+				cntRoad2 = arrMode[AMBER];
+			}
+
+			updateLedBuffer();
+		}
+		if(timer4_flag == 1){
+			setTimer4(25);
+			if (index_led >= 4) index_led = 0;
+				update7SEG(index_led++);
+		}
+
+
+
 }
 
