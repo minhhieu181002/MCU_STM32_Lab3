@@ -39,6 +39,10 @@
 #define DISPLAY_VALUE_RED	3
 #define DISPLAY_VALUE_GREEN	4
 #define DISPLAY_VALUE_AMBER	5
+
+#define BUTTON1		1
+#define BUTTON2		2
+#define BUTTON3		3
 extern int status;
 extern int arr[3];
 extern int arrMode[3];
